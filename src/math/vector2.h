@@ -3,8 +3,7 @@
 #define VECTOR2_H
 
 struct Vector2 {
-    float x;
-    float y;
+    float x, y;
 };
 
 #endif //VECTOR2_H

@@ -2,6 +2,8 @@
 #include "gamemode.h"
 #include "../renderer/cube.h"
 #include "../renderer/plane.h"
+#include "../renderer/camera.h"
+#include "../entities/player.h"
 #include <GL/gl.h>
 #include <libdragon.h>
 
@@ -11,6 +13,10 @@ float x = 5.0f;
 float y = 20.0f;
 
 struct Plane* plane;
+struct Camera cam;
+struct Player player;
+
+float camRot = 0.425f;
 
 void gamemode_world_init()
 {
@@ -22,22 +28,26 @@ void gamemode_world_init()
 
     rdpq_mode_persp(true);
 
-    float aspect_ratio = (float)display_get_width() / (float)display_get_height();
-    float near_plane = 1.0f;
-    float far_plane = 50.0f;
+    float aspectRatio = (float)display_get_width() / (float)display_get_height();
+    float nearPlane = 1.0f;
+    float farPlane = 50.0f;
 
     plane = plane_init(32.0f, 1);
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    glFrustum(-near_plane*aspect_ratio, near_plane*aspect_ratio, -near_plane, near_plane, near_plane, far_plane);
+    camera_init(&cam, 90.0f, aspectRatio, nearPlane, farPlane);
+
+    // Initial camera rotation
+    struct Vector3 axis2 = { 1.0f, 0.0f, 0.0f };
+    quat_axis_angle(&cam.transform.rot, &axis2, camRot);
+
+    // Init player.
+    player_init(&player);
 }
 
 void gamemode_world_cleanup()
 {
 
 }
-
 void gamemode_world_step()
 {
     joypad_inputs_t inputs = joypad_get_inputs(JOYPAD_PORT_1);
@@ -54,25 +64,45 @@ void gamemode_world_step()
         sz = 0.1f;
     }
 
-    float rot = 0.0f;
+    // TODO: Replace all this with camera_rotate.
+    // TODO: Replace 'axis' with global 'up', 'right', etc unit vectors.
     if(buttons.l) {
-        rot = -0.1f;
+        struct Quat qy;
+        struct Vector3 axis = { 0.0f, 1.0f, 0.0f };
+        camRot -= 0.05f;
+        quat_axis_angle(&qy, &axis, camRot);
+
+        struct Quat qx;
+        struct Vector3 axis2 = { 1.0f, 0.0f, 0.0f };
+        quat_axis_angle(&qx, &axis2, 0.425f);
+        quat_mul(&cam.transform.rot, &qx, &qy);
     } else if(buttons.r) {
-        rot = 0.1f;
+        struct Quat qy;
+        struct Vector3 axis = { 0.0f, 1.0f, 0.0f };
+        camRot += 0.05f;
+        quat_axis_angle(&qy, &axis, camRot);
+
+        struct Quat qx;
+        struct Vector3 axis2 = { 1.0f, 0.0f, 0.0f };
+        quat_axis_angle(&qx, &axis2, 0.425f);
+        quat_mul(&cam.transform.rot, &qx, &qy);
     }
 
-    if(fabsf(mag) > 0.01f || sz != 0.0f || rot != 0.0f) {
-        glMatrixMode(GL_MODELVIEW);
-        glTranslatef(-sx, sz, sy);
+    if(fabsf(mag) > 0.01f || sz != 0.0f) {
+        player.position.x += sx * 0.5f;
+        player.position.y += -sz * 0.5f;
+        player.position.z += -sy * 0.5f;
+        cam.target = player.position;
     }
 }
 
 void gamemode_world_render(surface_t* zbuffer)
 {
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
 
+    camera_update(&cam);
 
     glDisable(GL_CULL_FACE);
     glPushMatrix();
@@ -80,12 +110,15 @@ void gamemode_world_render(surface_t* zbuffer)
     plane_render(plane);
     glPopMatrix();
 
+    player_render(&player);
+
     glEnable(GL_CULL_FACE);
-    for(int i = 0; i < 5; ++i)
+
+    for(int i = 0; i < 4; ++i)
     {
-        for(int j = 0; j < 5; ++j)
+        for(int j = 0; j < 4; ++j)
         {
-            cube_render((float)i * 4.0f, 2.0f, (float)j * 4.0f, 1.0f);
+            cube_render((float)i * 4.0f, 1.0f, (float)j * 4.0f, 1.0f);
         }
     }
 
