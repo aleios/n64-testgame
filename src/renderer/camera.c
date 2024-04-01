@@ -35,7 +35,7 @@ void camera_update(struct Camera* cam) {
 
     // Grab new matrix.
     transform_tomat4(&cam->transform, viewMatrix);
-    glLoadMatrixf((GLfloat*)viewMatrix);
+    glLoadMatrixf(viewMatrix);
 
 }
 

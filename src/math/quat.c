@@ -31,25 +31,25 @@ void quat_tomat4(struct Quat* quat, Mat4 mat) {
     float yw = quat->y * quat->w;
     float zw = quat->z * quat->w;
 
-    mat[0][0] = 1.0f - 2.0f * (sqy + sqz);
-    mat[0][1] = 2.0f * (xy + zw);
-    mat[0][2] = 2.0f * (xz - yw);
-    mat[0][3] = 0.0f;
+    mat[0] = 1.0f - 2.0f * (sqy + sqz);
+    mat[1] = 2.0f * (xy + zw);
+    mat[2] = 2.0f * (xz - yw);
+    mat[3] = 0.0f;
 
-    mat[1][0] = 2.0f * (xy - zw);
-    mat[1][1] = 1.0f - 2.0f * (sqx + sqz);
-    mat[1][2] = 2.0f * (yz + xw);
-    mat[1][3] = 0.0f;
+    mat[4] = 2.0f * (xy - zw);
+    mat[5] = 1.0f - 2.0f * (sqx + sqz);
+    mat[6] = 2.0f * (yz + xw);
+    mat[7] = 0.0f;
 
-    mat[2][0] = 2.0f * (xz + yw);
-    mat[2][1] = 2.0f * (yz - xw);
-    mat[2][2] = 1.0f - 2.0f * (sqx + sqy);
-    mat[2][3] = 0.0f;
+    mat[8] = 2.0f * (xz + yw);
+    mat[9] = 2.0f * (yz - xw);
+    mat[10] = 1.0f - 2.0f * (sqx + sqy);
+    mat[11] = 0.0f;
 
-    mat[3][0] = 0.0f;
-    mat[3][1] = 0.0f;
-    mat[3][2] = 0.0f;
-    mat[3][3] = 1.0f;
+    mat[12] = 0.0f;
+    mat[13] = 0.0f;
+    mat[14] = 0.0f;
+    mat[15] = 1.0f;
 }
 
 void quat_conj(struct Quat* dest, struct Quat* quat) {

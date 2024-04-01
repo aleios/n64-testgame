@@ -5,7 +5,7 @@
 #include "vector3.h"
 
 // TODO: Convert to 1D array.
-typedef float Mat4[4][4];
+typedef float Mat4[16];
 
 void mat_identity(Mat4 mat);
 void mat_frustum(Mat4 mat, float left, float right, float bottom, float top, float near, float far);

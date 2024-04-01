@@ -12,20 +12,20 @@ void transform_tomat4(struct Transform* t, Mat4 mat) {
     quat_tomat4(&t->rot, mat);
 
     // Scale
-    mat[0][0] *= t->scale.x;
-    mat[0][1] *= t->scale.x;
-    mat[0][2] *= t->scale.x;
+    mat[0] *= t->scale.x;
+    mat[1] *= t->scale.x;
+    mat[2] *= t->scale.x;
 
-    mat[1][0] *= t->scale.y;
-    mat[1][1] *= t->scale.y;
-    mat[1][2] *= t->scale.y;
+    mat[4] *= t->scale.y;
+    mat[5] *= t->scale.y;
+    mat[6] *= t->scale.y;
 
-    mat[2][0] *= t->scale.z;
-    mat[2][1] *= t->scale.z;
-    mat[2][2] *= t->scale.z;
+    mat[8] *= t->scale.z;
+    mat[9] *= t->scale.z;
+    mat[10] *= t->scale.z;
 
     // Translation
-    mat[3][0] = t->pos.x;
-    mat[3][1] = t->pos.y;
-    mat[3][2] = t->pos.z;
+    mat[12] = t->pos.x;
+    mat[13] = t->pos.y;
+    mat[14] = t->pos.z;
 }
