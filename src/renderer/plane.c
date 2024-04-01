@@ -59,7 +59,7 @@ struct Plane* plane_init(float size, int segments)
             v->normal.y = 0.0f;
             v->normal.z = 0.0f;
 
-            v->color = 0xFFFFFFFF;
+            v->color = 0xCCCCCCCC;
         }
     }
 
