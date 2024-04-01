@@ -1,0 +1,14 @@
+-----
+-- Textures
+-----
+wooden-crate.png:
+    - Author: Proxy Games
+    - License: CC0
+    - URL: https://opengameart.org/content/wooden-crate-texture
+    - Modifications: None
+
+floor.png
+    - Author: z1Rome
+    - License: CC0
+    - URL: https://opengameart.org/content/tile-textures-0
+    - Modifications: Partitioned in single tile, Scaled down to 32x32

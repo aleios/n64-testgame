@@ -5,8 +5,8 @@
 
 struct PlaneVertex {
     struct Vector3 pos;
+    struct Vector2 texcoord;
     struct Vector3 normal;
-    uint32_t color;
 };
 
 struct Plane* plane_init(float size, int segments)
@@ -27,16 +27,16 @@ struct Plane* plane_init(float size, int segments)
 
     // Enable states.
     glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
-    glEnableClientState(GL_COLOR_ARRAY);
 
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, plane->buffers[0]);
     glBufferDataARB(GL_ARRAY_BUFFER_ARB, numVertices * sizeof(struct PlaneVertex), NULL, GL_STATIC_DRAW_ARB);
 
     // Attrib pointers
     glVertexPointer(3, GL_FLOAT, sizeof(struct PlaneVertex), (void*)(0*sizeof(float)));
-    glNormalPointer(GL_FLOAT, sizeof(struct PlaneVertex), (void*)(3*sizeof(float)));
-    glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(struct PlaneVertex), (void*)(6*sizeof(float)));
+    glTexCoordPointer(2, GL_FLOAT, sizeof(struct PlaneVertex), (void*)(3*sizeof(float)));
+    glNormalPointer(GL_FLOAT, sizeof(struct PlaneVertex), (void*)(5*sizeof(float)));
 
     glBindVertexArray(0);
 
@@ -55,11 +55,12 @@ struct Plane* plane_init(float size, int segments)
             v->pos.y = 0.0f;
             v->pos.z = p0 - incr * y;
 
+            v->texcoord.x = x;
+            v->texcoord.y = y;
+
             v->normal.x = 0.0f;
             v->normal.y = 0.0f;
             v->normal.z = 0.0f;
-
-            v->color = 0xCCCCCCCC;
         }
     }
 

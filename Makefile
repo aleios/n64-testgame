@@ -19,14 +19,25 @@ filesystem/%.font64: assets/fonts/%.ttf
 	mkfont -o filesystem "$<"
 
 #####
+# Textures
+#####
+TEX_SOURCES := $(shell find assets/ -type f -name '*.png' | sort)
+TEXTURES := $(TEX_SOURCES:assets/textures/%.png=filesystem/%.sprite)
+
+filesystem/%.sprite: assets/textures/%.png
+	@mkdir -p $(dir %@)
+	@echo " [MKSPRITE] $@"
+	mksprite -o filesystem "$<"
+
+#####
 # Sources
 #####
 SOURCES := $(shell find src/ -type f -name '*.c' | sort)
 SOURCE_OBJS := $(SOURCES:src/%.c=$(BUILD_DIR)/%.o)
 OBJS := $(BUILD_DIR)/main.o $(SOURCE_OBJS)
 
-filesystem/: $(FONTS)
-$(BUILD_DIR)/$(ROM_NAME).dfs: filesystem/ $(FONTS)
+filesystem/: $(FONTS) $(TEXTURES)
+$(BUILD_DIR)/$(ROM_NAME).dfs: filesystem/ $(FONTS) $(TEXTURES)
 $(BUILD_DIR)/$(ROM_NAME).elf: $(OBJS)
 
 $(ROM_NAME).z64: N64_ROM_TITLE="Test Game"
