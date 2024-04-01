@@ -21,22 +21,28 @@ void camera_init(struct Camera* cam, float fovy, float aspect, float near, float
 
 void camera_update(struct Camera* cam) {
 
-    struct Vector3 offset = { 0.0f, 0.0f, -4.0f };
-    // Translate to object coords.
+    struct Vector3 offset = { 0.0f, 0.0f, -cam->maxFollowDistance };
+    // Move back to the target.
     cam->transform.pos = cam->target;
-    // Rotate around object.
-    quat_mul_vec(&cam->transform.pos, &cam->transform.rot,&cam->transform.pos);
-    // Translate back.
-    vector3_sub(&cam->transform.pos, &cam->transform.pos, &offset);
-    vector3_negate(&cam->transform.pos);
 
     // Calculate new view matrix.
     Mat4 viewMatrix = {};
-    transform_tomat4(&cam->transform, viewMatrix);
 
+    // Do our transforms
+    quat_mul_vec(&cam->transform.pos, &cam->transform.rot, &cam->transform.pos);
+    vector3_sub(&cam->transform.pos, &cam->transform.pos, &offset);
+    vector3_negate(&cam->transform.pos);
+
+    // Grab new matrix.
+    transform_tomat4(&cam->transform, viewMatrix);
     glLoadMatrixf((GLfloat*)viewMatrix);
+
 }
 
-void camera_rotate(struct Camera* cam, float pitch, float yaw, float roll) {
-    // TODO: Implement instead of relying on outside transforms.
+void camera_rotate(struct Camera* cam, float pitch, float yaw) {
+    struct Quat qx;
+    struct Quat qy;
+    quat_axis_angle(&qy, &unitVecUp, yaw); // Rotate around Y
+    quat_axis_angle(&qx, &unitVecRight, pitch); // Rotate around X
+    quat_mul(&cam->transform.rot, &qx, &qy);
 }

@@ -16,7 +16,8 @@ struct Plane* plane;
 struct Camera cam;
 struct Player player;
 
-float camRot = 0.425f;
+float camRot = 0.0f;
+float camRotPitch = 0.425f;
 
 void gamemode_world_init()
 {
@@ -35,10 +36,10 @@ void gamemode_world_init()
     plane = plane_init(32.0f, 1);
 
     camera_init(&cam, 90.0f, aspectRatio, nearPlane, farPlane);
+    cam.maxFollowDistance = 8.0f;
 
     // Initial camera rotation
-    struct Vector3 axis2 = { 1.0f, 0.0f, 0.0f };
-    quat_axis_angle(&cam.transform.rot, &axis2, camRot);
+    camera_rotate(&cam, camRotPitch, camRot);
 
     // Init player.
     player_init(&player);
@@ -64,36 +65,28 @@ void gamemode_world_step()
         sz = 0.1f;
     }
 
-    // TODO: Replace all this with camera_rotate.
-    // TODO: Replace 'axis' with global 'up', 'right', etc unit vectors.
     if(buttons.l) {
-        struct Quat qy;
-        struct Vector3 axis = { 0.0f, 1.0f, 0.0f };
-        camRot -= 0.05f;
-        quat_axis_angle(&qy, &axis, camRot);
-
-        struct Quat qx;
-        struct Vector3 axis2 = { 1.0f, 0.0f, 0.0f };
-        quat_axis_angle(&qx, &axis2, 0.425f);
-        quat_mul(&cam.transform.rot, &qx, &qy);
+        if(buttons.a) {
+            camRotPitch += 0.05f;
+        } else {
+            camRot += 0.05f;
+        }
+        camera_rotate(&cam, camRotPitch, camRot);
     } else if(buttons.r) {
-        struct Quat qy;
-        struct Vector3 axis = { 0.0f, 1.0f, 0.0f };
-        camRot += 0.05f;
-        quat_axis_angle(&qy, &axis, camRot);
-
-        struct Quat qx;
-        struct Vector3 axis2 = { 1.0f, 0.0f, 0.0f };
-        quat_axis_angle(&qx, &axis2, 0.425f);
-        quat_mul(&cam.transform.rot, &qx, &qy);
+        if(buttons.a) {
+            camRotPitch -= 0.05f;
+        } else {
+            camRot -= 0.05f;
+        }
+        camera_rotate(&cam, camRotPitch, camRot);
     }
 
     if(fabsf(mag) > 0.01f || sz != 0.0f) {
-        player.position.x += sx * 0.5f;
-        player.position.y += -sz * 0.5f;
-        player.position.z += -sy * 0.5f;
-        cam.target = player.position;
+        player.position.x += sx * 0.1f;
+        player.position.y += -sz * 0.1f;
+        player.position.z += -sy * 0.1f;
     }
+    vector3_lerp(&cam.target, &cam.target, &player.position, 0.05f);
 }
 
 void gamemode_world_render(surface_t* zbuffer)
