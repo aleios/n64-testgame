@@ -2,6 +2,7 @@ V=1
 SOURCE_DIR=src
 BUILD_DIR=build
 ROM_NAME=testgame
+BLENDER=blender
 include $(N64_INST)/include/n64.mk
 
 all: $(ROM_NAME).z64
@@ -30,14 +31,29 @@ filesystem/%.sprite: assets/textures/%.png
 	mksprite -o filesystem "$<"
 
 #####
+# Models
+#####
+
+MODEL_SOURCES := $(shell find assets/models -type f -name '*.blend' | sort)
+MODELS := $(MODEL_SOURCES:assets/models/%.blend=filesystem/%.aemf)
+
+filesystem/%.aemf: assets/models/%.blend
+	@mkdir -p $(dir %@)
+	@mkdir -p $(dir $(@:filesystem/%.aemf=$(BUILD_DIR)/asset_staging/%.aemf))
+	@echo " [BLENDER CONVERT] $<"
+	$(BLENDER) $< -b -P util/blender/convert_model.py --python-exit-code 1 -- $(@:filesystem/%.aemf=$(BUILD_DIR)/asset_staging/%.aemf)
+	@echo " [MKMODEL] $@"
+	mkasset -o filesystem $(@:filesystem/%.aemf=$(BUILD_DIR)/asset_staging/%.aemf)
+
+#####
 # Sources
 #####
 SOURCES := $(shell find src/ -type f -name '*.c' | sort)
 SOURCE_OBJS := $(SOURCES:src/%.c=$(BUILD_DIR)/%.o)
 OBJS := $(BUILD_DIR)/main.o $(SOURCE_OBJS)
 
-filesystem/: $(FONTS) $(TEXTURES)
-$(BUILD_DIR)/$(ROM_NAME).dfs: filesystem/ $(FONTS) $(TEXTURES)
+filesystem/: $(FONTS) $(TEXTURES) $(MODELS)
+$(BUILD_DIR)/$(ROM_NAME).dfs: filesystem/ $(FONTS) $(TEXTURES) $(MODELS)
 $(BUILD_DIR)/$(ROM_NAME).elf: $(OBJS)
 
 $(ROM_NAME).z64: N64_ROM_TITLE="Test Game"

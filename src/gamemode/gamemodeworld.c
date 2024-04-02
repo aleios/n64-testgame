@@ -1,11 +1,12 @@
 #include "gamemodeworld.h"
-#include "../renderer/cube.h"
 #include "../renderer/plane.h"
 #include "../renderer/camera.h"
 #include "../entities/player.h"
 #include <GL/gl.h>
 #include <libdragon.h>
 #include <malloc.h>
+
+#include "../assets/modelcache.h"
 
 rdpq_font_t* fnt;
 
@@ -25,6 +26,8 @@ sprite_t* floorSprite;
 GLuint crateTex;
 GLuint playerTex;
 GLuint floorTex;
+
+struct Model* cubeModel;
 
 void load_texture(const char* fname, sprite_t* sprite, GLuint* texid) {
 
@@ -71,6 +74,8 @@ void gamemode_world_init()
     load_texture("rom:/wooden-crate.sprite", crateSprite, &crateTex);
     load_texture("rom:/player.sprite", playerSprite, &playerTex);
     load_texture("rom:/floor.sprite", floorSprite, &floorTex);
+
+    cubeModel = modelcache_get("rom:/cube.aemf");
 }
 
 void gamemode_world_cleanup()
@@ -159,7 +164,10 @@ void gamemode_world_render(surface_t* zbuffer)
     {
         for(int j = 0; j < 4; ++j)
         {
-            cube_render((float)i * 4.0f, 1.0f, (float)j * 4.0f, 1.0f);
+            glPushMatrix();
+            glTranslatef((float)i * 4.0f, 1.0f, (float)j * 4.0f);
+            model_render(cubeModel);
+            glPopMatrix();
         }
     }
 
