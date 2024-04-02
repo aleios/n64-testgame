@@ -5,10 +5,6 @@
 ## TODOs:
 
 ### Camera
-* Normalize coordinate system(s). Seriously it's all over the place.
-* Sort out the quaternion logic. Might be reversed?
-* Make camera self-contained. Minimize use of transform outside camera related functions.
-* Lerp camera position and rotation about the target.
 * Extract clipping planes from camera frustum for culling.
 
 ### Renderer
@@ -21,8 +17,7 @@
 * Implement basic collision detection and resolution.
 
 ### Assets
-* Import mesh from blender
+* Improve blender export script.
 * Caches for textures and models.
 
 ### Other refactoring
-* Matrix as 1D array instead of 2D.
