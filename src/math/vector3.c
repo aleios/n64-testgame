@@ -27,6 +27,10 @@ float vector3_length(struct Vector3* a) {
     return sqrtf(a->x * a->x + a->y * a->y + a->z * a->z);
 }
 
+float vector3_lengthsqr(struct Vector3* a) {
+    return a->x * a->x + a->y * a->y + a->z * a->z;
+}
+
 void vector3_normalize(struct Vector3* a) {
     float len = vector3_length(a);
 

@@ -1,11 +1,11 @@
 #include "gamemodeworld.h"
-#include "gamemode.h"
 #include "../renderer/cube.h"
 #include "../renderer/plane.h"
 #include "../renderer/camera.h"
 #include "../entities/player.h"
 #include <GL/gl.h>
 #include <libdragon.h>
+#include <malloc.h>
 
 rdpq_font_t* fnt;
 
@@ -88,17 +88,19 @@ void gamemode_world_step()
 {
     joypad_inputs_t inputs = joypad_get_inputs(JOYPAD_PORT_1);
     joypad_buttons_t buttons = joypad_get_buttons_held(JOYPAD_PORT_1);
+    struct Vector3 moveDir = { 0.0f, 0.0f, 0.0f };
 
-    float sx = (float)inputs.stick_x / 128.0f;
-    float sy = (float)inputs.stick_y / 128.0f;
-    float mag = sx*sx + sy*sy;
+    moveDir.x = (float)inputs.stick_x / 128.0f;
+    moveDir.z = -(float)inputs.stick_y / 128.0f;
 
-    float sz = 0.0f;
+    float moveY = 0.0f;
     if(buttons.c_up) {
-        sz = -0.1f;
+        moveY = 0.2f;
     } else if(buttons.c_down) {
-        sz = 0.1f;
+        moveY = -0.2f;
     }
+
+    float mag = vector3_lengthsqr(&moveDir);
 
     if(buttons.l) {
         if(buttons.a) {
@@ -116,12 +118,18 @@ void gamemode_world_step()
         camera_rotate(&cam, camRotPitch, camRot);
     }
 
-    if(fabsf(mag) > 0.01f || sz != 0.0f) {
-        player.position.x += sx * 0.1f;
-        player.position.y += -sz * 0.1f;
-        player.position.z += -sy * 0.1f;
+    if(fabsf(mag) > 0.01f || fabsf(moveY) > 0.01f) {
+
+        struct Quat qx;
+        quat_conj(&qx, &cam.transform.rot);
+        quat_mul_vec(&moveDir, &qx, &moveDir);
+
+        const float inputScale = 0.1f;
+        player.position.x += moveDir.x * inputScale;
+        player.position.z += moveDir.z * inputScale;
+        player.position.y += moveY * inputScale;
     }
-    vector3_lerp(&cam.target, &cam.target, &player.position, 0.05f);
+    vector3_lerp(&cam.target, &cam.target, &player.position, 0.1f);
 }
 
 void gamemode_world_render(surface_t* zbuffer)
@@ -155,12 +163,16 @@ void gamemode_world_render(surface_t* zbuffer)
         }
     }
 
+    struct mallinfo mallocInfo = mallinfo();
     float fps = display_get_fps();
+    unsigned int memTotal = get_memory_size() / 1024;
+    unsigned int memUsed = (mallocInfo.uordblks - (size_t) (((unsigned int) HEAP_START_ADDR - 0x80000000) - 0x10000)) / 1024;
+
     rdpq_text_printf(&(rdpq_textparms_t){
         .align = ALIGN_LEFT,
         .valign = VALIGN_TOP,
         .width = 0,
         .height = 0,
         .wrap = WRAP_NONE
-        }, 1, x, y, "FPS: %f", fps);
+        }, 1, x, y, "FPS: %f\nMem: %u/%u", fps, memUsed, memTotal);
 }
