@@ -2,7 +2,7 @@ import bpy
 import bmesh
 import sys
 import struct
-
+import mathutils
 
 def vec_to_tuple(vector):
     return (vector.x, vector.y, vector.z)
@@ -19,11 +19,18 @@ def write_model(file):
     meshes = bpy.data.meshes
     write_model_header(file, len(meshes))
 
-    for mesh in meshes:
-        write_mesh(file, mesh)
+    # Transform matrix to get into right-handed coords.
+    rh_mat = mathutils.Matrix(((1, 0, 0, 0),
+                               (0, 0, 1, 0),
+                               (0, -1, 0, 0),
+                               (0, 0, 0, 1)))
+    for obj in bpy.context.scene.objects:
+        if obj.type != 'MESH':
+            continue
+        write_mesh(file, obj.data, rh_mat @ obj.matrix_world)
 
 
-def write_mesh(file, mesh):
+def write_mesh(file, mesh, mat):
     # Triangulate before export.
     m = bmesh.new()
     m.from_mesh(mesh)
@@ -40,7 +47,8 @@ def write_mesh(file, mesh):
             uv = mesh.uv_layers.active.data[loop_idx].uv
 
             # Make unique key
-            key = (vec_to_tuple(vertex.co), (uv.x, uv.y), vec_to_tuple(vertex.normal))
+            vertex_world = mat @ vertex.co
+            key = (vec_to_tuple(vertex_world), (uv.x, uv.y), vec_to_tuple(vertex.normal))
 
             # Check if vertex already in list otherwise append the new one.
             if key in unique_vertices:
