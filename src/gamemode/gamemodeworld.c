@@ -21,10 +21,8 @@ struct Player player;
 float camRot = 0.0f;
 float camRotPitch = 0.425f;
 
-sprite_t* crateSprite;
 sprite_t* playerSprite;
 sprite_t* floorSprite;
-GLuint crateTex;
 GLuint playerTex;
 GLuint floorTex;
 
@@ -73,7 +71,6 @@ void gamemode_world_init()
     player_init(&player);
 
     // Load and upload crate sprite.
-    load_texture("rom:/wooden-crate.sprite", crateSprite, &crateTex);
     load_texture("rom:/player.sprite", playerSprite, &playerTex);
     load_texture("rom:/floor.sprite", floorSprite, &floorTex);
 
@@ -88,11 +85,9 @@ void gamemode_world_cleanup()
 
     glDeleteTextures(1, &floorTex);
     glDeleteTextures(1, &playerTex);
-    glDeleteTextures(1, &crateTex);
 
     sprite_free(floorSprite);
     sprite_free(playerSprite);
-    sprite_free(crateSprite);
 }
 
 void gamemode_world_step()
