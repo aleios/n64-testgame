@@ -3,6 +3,7 @@ SOURCE_DIR=src
 BUILD_DIR=build
 ROM_NAME=testgame
 BLENDER=blender
+PYTHON=python
 include $(N64_INST)/include/n64.mk
 
 all: $(ROM_NAME).z64
@@ -46,14 +47,28 @@ filesystem/%.aemf: assets/models/%.blend
 	mkasset -o filesystem $(@:filesystem/%.aemf=$(BUILD_DIR)/asset_staging/%.aemf)
 
 #####
+# Materials
+#####
+MATERIAL_SOURCES := $(shell find assets/materials -type f -name '*.json' | sort)
+MATERIALS := $(MATERIAL_SOURCES:assets/materials/%.json=filesystem/%.amtl)
+
+filesystem/%.amtl: assets/materials/%.json
+	@mkdir -p $(dir %@)
+	@mkdir -p $(dir $(@:filesystem/%.amtl=$(BUILD_DIR)/asset_staging/%.amtl))
+	@echo " [MATERIAL CONVERT] $<"
+	$(PYTHON) util/blender/convert_material.py $< $(@:filesystem/%.amtl=$(BUILD_DIR)/asset_staging/%.amtl)
+	@echo " [MKMATERIAL] $@"
+	mkasset -o filesystem $(@:filesystem/%.amtl=$(BUILD_DIR)/asset_staging/%.amtl)
+
+#####
 # Sources
 #####
 SOURCES := $(shell find src/ -type f -name '*.c' | sort)
 SOURCE_OBJS := $(SOURCES:src/%.c=$(BUILD_DIR)/%.o)
 OBJS := $(BUILD_DIR)/main.o $(SOURCE_OBJS)
 
-filesystem/: $(FONTS) $(TEXTURES) $(MODELS)
-$(BUILD_DIR)/$(ROM_NAME).dfs: filesystem/ $(FONTS) $(TEXTURES) $(MODELS)
+filesystem/: $(FONTS) $(TEXTURES) $(MODELS) $(MATERIALS)
+$(BUILD_DIR)/$(ROM_NAME).dfs: filesystem/ $(FONTS) $(TEXTURES) $(MODELS) $(MATERIALS)
 $(BUILD_DIR)/$(ROM_NAME).elf: $(OBJS)
 
 $(ROM_NAME).z64: N64_ROM_TITLE="Test Game"

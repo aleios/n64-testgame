@@ -7,6 +7,7 @@
 #include <malloc.h>
 
 #include "../assets/modelcache.h"
+#include "../assets/matcache.h"
 
 rdpq_font_t* fnt;
 
@@ -28,6 +29,7 @@ GLuint playerTex;
 GLuint floorTex;
 
 struct Model* cubeModel;
+struct Material* cubeMaterial;
 
 void load_texture(const char* fname, sprite_t* sprite, GLuint* texid) {
 
@@ -76,10 +78,14 @@ void gamemode_world_init()
     load_texture("rom:/floor.sprite", floorSprite, &floorTex);
 
     cubeModel = modelcache_get("rom:/cube.aemf");
+    cubeMaterial = matcache_get("rom:/cube.amtl");
 }
 
 void gamemode_world_cleanup()
 {
+    matcache_release(cubeMaterial);
+    modelcache_release(cubeModel);
+
     glDeleteTextures(1, &floorTex);
     glDeleteTextures(1, &playerTex);
     glDeleteTextures(1, &crateTex);
@@ -159,7 +165,7 @@ void gamemode_world_render(surface_t* zbuffer)
     glBindTexture(GL_TEXTURE_2D, playerTex);
     player_render(&player);
 
-    glBindTexture(GL_TEXTURE_2D, crateTex);
+    material_apply(cubeMaterial);
     for(int i = 0; i < 4; ++i)
     {
         for(int j = 0; j < 4; ++j)
