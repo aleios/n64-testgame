@@ -28,6 +28,8 @@ GLuint floorTex;
 
 struct Model* cubeModel;
 struct Material* cubeMaterial;
+struct Material* floorMaterial;
+struct Material* playerMaterial;
 
 void load_texture(const char* fname, sprite_t* sprite, GLuint* texid) {
 
@@ -76,6 +78,8 @@ void gamemode_world_init()
 
     cubeModel = modelcache_get("rom:/cube.aemf");
     cubeMaterial = matcache_get("rom:/cube.amtl");
+    floorMaterial = matcache_get("rom:/floor.amtl");
+    playerMaterial = matcache_get("rom:/player.amtl");
 }
 
 void gamemode_world_cleanup()
@@ -147,17 +151,13 @@ void gamemode_world_render(surface_t* zbuffer)
 
     camera_update(&cam);
 
-    glDisable(GL_CULL_FACE);
-
-    glBindTexture(GL_TEXTURE_2D, floorTex);
+    material_apply(floorMaterial);
     glPushMatrix();
     glTranslatef(0.0f, 0.0f, 0.0f);
     plane_render(plane);
     glPopMatrix();
 
-    glEnable(GL_CULL_FACE);
-
-    glBindTexture(GL_TEXTURE_2D, playerTex);
+    material_apply(playerMaterial);
     player_render(&player);
 
     material_apply(cubeMaterial);

@@ -1,5 +1,6 @@
 #include <libdragon.h>
 #include "matcache.h"
+#include "sprcache.h"
 
 struct Material* matcache_load(const char* filename) {
     FILE* f = asset_fopen(filename, NULL);
@@ -38,8 +39,7 @@ struct Material* matcache_load(const char* filename) {
         fread(texFilename, sizeof(char), pathLen, f);
 
         // Generate and upload texture.
-        // TODO: Load from cache.
-        sprite_t* sprite = sprite_load(texFilename);
+        sprite_t* sprite = sprcache_get(texFilename);
 
         glGenTextures(1, &mat->texture);
         glBindTexture(GL_TEXTURE_2D, mat->texture);
