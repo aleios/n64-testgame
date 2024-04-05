@@ -1,4 +1,5 @@
 #include "modelcache.h"
+#include "matcache.h"
 #include <libdragon.h>
 
 struct Model* modelcache_load(const char* filename) {
@@ -29,6 +30,16 @@ struct Model* modelcache_load(const char* filename) {
 
     // Iterate meshes
     for(uint16_t i = 0; i < numMeshes; ++i) {
+
+        // Read material name.
+        uint16_t matNameLen;
+        fread(&matNameLen, sizeof(uint16_t), 1, f);
+        char matName[matNameLen];
+        fread(&matName, sizeof(char), matNameLen, f);
+
+        // Try load material
+        // TODO: Default material for when loading fails.
+        model->materials[i] = matcache_get(matName);
 
         // Read number of vertices and indices.
         uint16_t numVertices;

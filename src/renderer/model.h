@@ -3,9 +3,11 @@
 #define MODEL_H
 
 #include <GL/gl.h>
+#include "material.h"
 
 struct Model {
     GLuint listIds;
+    struct Material** materials;
     uint16_t numMeshes;
 
 // TODO: Need dynarray to track these...
