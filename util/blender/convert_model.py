@@ -17,8 +17,7 @@ def write_model_header(file, numMeshes):
 
 
 def write_model(file):
-    meshes = bpy.data.meshes
-    write_model_header(file, len(meshes))
+    meshes = []
 
     # Transform matrix to get into right-handed coords.
     rh_mat = mathutils.Matrix(((1, 0, 0, 0),
@@ -45,7 +44,12 @@ def write_model(file):
             material = obj.data.materials[mat_idx]
             if not material:
                 continue
-            write_mesh(file, mesh, tmat, mat_idx, material)
+            meshes.append((mesh, tmat, mat_idx, material))
+
+    write_model_header(file, len(meshes))
+
+    for mesh in meshes:
+        write_mesh(file, *mesh)
 
 
 def write_mesh(file, mesh, tmat, mat_idx, material):
@@ -107,5 +111,4 @@ def main():
 
 
 # Execute from entry point
-# TODO: Change structure. Gather meshes before exporting.
 main()
