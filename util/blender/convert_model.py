@@ -40,12 +40,11 @@ def write_model(file):
         # Grab the transform matrix for the object.
         tmat = rh_mat @ obj.matrix_world
 
-        for mat_idx in range(max(len(mesh.materials), 1)):
-            if mat_idx < len(mesh.materials):
-                material = obj.data.materials[mat_idx]
-            else:
-                material = None
-
+        num_mats = max(len(mesh.materials), 1)
+        for mat_idx in range(num_mats):
+            material = obj.data.materials[mat_idx]
+            if not material:
+                continue
             write_mesh(file, mesh, tmat, mat_idx, material)
 
 
@@ -108,5 +107,5 @@ def main():
 
 
 # Execute from entry point
-# TODO: Change structure. Gather meshes before exporting. Otherwise wrong number of submeshes... and material index negative???
+# TODO: Change structure. Gather meshes before exporting.
 main()
