@@ -108,4 +108,5 @@ def main():
 
 
 # Execute from entry point
+# TODO: Change structure. Gather meshes before exporting. Otherwise wrong number of submeshes... and material index negative???
 main()
