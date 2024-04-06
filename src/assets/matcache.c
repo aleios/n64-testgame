@@ -1,8 +1,17 @@
 #include <libdragon.h>
+#include <sys/stat.h>
 #include "matcache.h"
 #include "sprcache.h"
+#include "simplecache.h"
+
+struct SimpleCache matcache;
 
 struct Material* matcache_load(const char* filename) {
+
+    struct stat sb;
+    if(stat(filename, &sb) == -1)
+        return NULL;
+
     FILE* f = asset_fopen(filename, NULL);
 
     if(!f) {
@@ -52,7 +61,12 @@ struct Material* matcache_load(const char* filename) {
 }
 
 struct Material* matcache_get(const char* filename) {
-    return matcache_load(filename);
+    struct Material* mat = simple_cache_get(&matcache, filename);
+    if(!mat) {
+        mat = matcache_load(filename);
+        simple_cache_put(&matcache, filename, mat);
+    }
+    return mat;
 }
 
 void matcache_release(struct Material* mat) {

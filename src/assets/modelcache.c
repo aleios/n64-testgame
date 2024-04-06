@@ -37,9 +37,9 @@ struct Model* modelcache_load(const char* filename) {
         char matName[matNameLen];
         fread(&matName, sizeof(char), matNameLen, f);
 
-        // Try load material
-        // TODO: Default material for when loading fails.
-        model->materials[i] = matcache_get(matName);
+        // Try load material otherwise use default.
+        struct Material* loadedMat = matcache_get(matName);
+        model->materials[i] = (loadedMat) ? loadedMat : material_default();
 
         // Read number of vertices and indices.
         uint16_t numVertices;

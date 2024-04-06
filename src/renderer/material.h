@@ -11,6 +11,8 @@ struct Material {
     GLuint texture;
 };
 
+struct Material* material_default();
+
 struct Material* material_init();
 void material_destroy(struct Material* mat);
 void material_apply(struct Material* mat);
